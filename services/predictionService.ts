@@ -26,8 +26,16 @@ export const parseExcelFile = (file: File): Promise<any[]> => {
   });
 };
 
-// This is a MOCK prediction function that simulates the CatBoost model's logic.
-// It uses a specified list of features, with four key variables having the most weight.
+// Determine API URL based on environment
+const getApiUrl = () => {
+  // In development
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000';
+  }
+  
+  // In production (Vercel)
+  return '';  // Use relative path for Vercel functions
+};
 export const mockCatBoostPredict = (data: CustomerData[]): CustomerData[] => {
   return data.map(customer => {
     // === 1. Feature Engineering ===
@@ -135,21 +143,16 @@ export const mockCatBoostPredict = (data: CustomerData[]): CustomerData[] => {
 };
 
 export async function predict(payload: CustomerData[]) {
-  // API URL - tự động detect environment
-  const isProduction = window.location.hostname !== 'localhost';
-  const base = isProduction 
-    ? `${window.location.origin}/api`  // Vercel production
-    : (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_PREDICT_API_URL) || 
-      (window as any).VITE_PREDICT_API_URL || 
-      "http://localhost:8000";  // Local development
+  const apiUrl = getApiUrl();
+  const endpoint = apiUrl ? `${apiUrl}/predict` : '/api/predict';
   
   try {
-    console.log(`🔗 Connecting to API: ${base} (production: ${isProduction})`);
+    console.log(`🔗 Connecting to API: ${endpoint}`);
     
     const responses = await Promise.all(payload.map(async (customer, index) => {
       console.log(`📤 Sending request ${index + 1}/${payload.length} for customer ${customer.CustomerId}`);
       
-      const res = await fetch(`${base}/predict`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: customer }),

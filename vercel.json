@@ -2,16 +2,5 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "functions": {
-    "api-vercel/main.py": {
-      "runtime": "python3.9"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api-vercel/main.py"
-    }
-  ]
+  "installCommand": "npm install"
 }
