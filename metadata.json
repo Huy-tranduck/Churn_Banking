@@ -1,0 +1,5 @@
+{
+  "name": "Customer Churn Prediction Visualizer",
+  "description": "A web application to visualize customer churn predictions from an Excel file, based on a simulated CatBoost classifier model. Upload your customer data to see predictions and analytics.",
+  "requestFramePermissions": []
+}
