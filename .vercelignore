@@ -1,0 +1,51 @@
+# Dependencies
+node_modules
+.npm
+
+# Build outputs
+dist
+build
+.vercel
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large model files
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+
+# Dataset files (too large for deployment)
+*.csv
+*.xlsx
+*.xls
+ChurnDataset.xlsx
+dataset/
+
+# API folder (using serverless function instead)
+api/main.py
+api/requirements.txt

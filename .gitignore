@@ -43,3 +43,4 @@ venv.bak/
 *.pkl
 *.joblib
 *.model
+.vercel
