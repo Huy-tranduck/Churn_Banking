@@ -133,3 +133,51 @@ export const mockCatBoostPredict = (data: CustomerData[]): CustomerData[] => {
     };
   });
 };
+
+export async function predict(payload: CustomerData[]) {
+  // API URL - tự động detect environment
+  const isProduction = window.location.hostname !== 'localhost';
+  const base = isProduction 
+    ? `${window.location.origin}/api`  // Vercel production
+    : (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_PREDICT_API_URL) || 
+      (window as any).VITE_PREDICT_API_URL || 
+      "http://localhost:8000";  // Local development
+  
+  try {
+    console.log(`🔗 Connecting to API: ${base} (production: ${isProduction})`);
+    
+    const responses = await Promise.all(payload.map(async (customer, index) => {
+      console.log(`📤 Sending request ${index + 1}/${payload.length} for customer ${customer.CustomerId}`);
+      
+      const res = await fetch(`${base}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: customer }),
+      });
+      
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`API Error ${res.status}: ${txt}`);
+      }
+      
+      const response = await res.json();
+      console.log(`📥 Response ${index + 1}: Probability=${response.probability.toFixed(4)}, Prediction=${response.prediction}`);
+      
+      return response;
+    }));
+
+    console.log(`✅ Successfully processed ${responses.length} predictions`);
+
+    // Map responses back into CustomerData[] structure
+    return payload.map((customer, idx) => ({
+      ...customer,
+      Prediction: responses[idx].prediction,
+      ChurnProbability: responses[idx].probability,
+      ConfidenceScore: responses[idx].prediction === 1 ? responses[idx].probability : 1 - responses[idx].probability,
+    }));
+  } catch (err) {
+    console.error('❌ Prediction API failed:', err);
+    console.warn('🔄 Falling back to mock prediction...');
+    return mockCatBoostPredict(payload);
+  }
+}
