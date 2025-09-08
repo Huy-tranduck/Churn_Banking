@@ -3,7 +3,7 @@ import { FileUpload } from './components/FileUpload';
 import { ManualEntryForm } from './components/ManualEntryForm';
 import { Dashboard } from './components/Dashboard';
 import { PredictionResult, CustomerData } from './types';
-import { parseExcelFile, mockCatBoostPredict } from './services/predictionService';
+import { parseExcelFile, predict } from './services/predictionService';
 
 const App: React.FC = () => {
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
@@ -19,16 +19,21 @@ const App: React.FC = () => {
     setShowDashboard(false);
 
     try {
+      console.log('📊 Starting prediction process...');
       const jsonData = await parseExcelFile(file);
+      console.log(`📋 Parsed ${jsonData.length} customers from Excel file`);
       
-      // Add a small delay to simulate processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Add a small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      const dataWithPredictions: CustomerData[] = mockCatBoostPredict(jsonData as CustomerData[]);
+      console.log('🤖 Calling prediction API...');
+      const dataWithPredictions: CustomerData[] = await predict(jsonData as CustomerData[]);
       
       const churnCount = dataWithPredictions.filter(c => c.Prediction === 1).length;
       const totalCustomers = dataWithPredictions.length;
       const retentionCount = totalCustomers - churnCount;
+
+      console.log(`✅ Prediction complete: ${churnCount}/${totalCustomers} customers predicted to churn`);
 
       setPredictionResult({
         totalCustomers,
@@ -38,6 +43,7 @@ const App: React.FC = () => {
       });
       setShowDashboard(true);
     } catch (err) {
+      console.error('❌ Prediction failed:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -55,15 +61,19 @@ const App: React.FC = () => {
     setShowDashboard(false);
 
     try {
+        console.log('📝 Manual prediction for single customer...');
         const dataToPredict = [customerData as CustomerData];
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 300));
 
-        const dataWithPredictions: CustomerData[] = mockCatBoostPredict(dataToPredict);
+        console.log('🤖 Calling prediction API for manual entry...');
+        const dataWithPredictions: CustomerData[] = await predict(dataToPredict);
       
         const churnCount = dataWithPredictions.filter(c => c.Prediction === 1).length;
         const totalCustomers = dataWithPredictions.length;
         const retentionCount = totalCustomers - churnCount;
+
+        console.log(`✅ Manual prediction complete: Customer ${dataWithPredictions[0].Prediction === 1 ? 'likely to churn' : 'likely to stay'}`);
 
         setPredictionResult({
             totalCustomers,

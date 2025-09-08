@@ -1,0 +1,6 @@
+CustomerId,CreditScore,Gender,Age,Tenure,Balance,NumOfProducts,HasCrCard,IsActiveMember,EstimatedSalary,LoginFrequency,ExternalTransfers
+1001,600,Female,35,1,0,1,0,0,50000,2,0
+1002,750,Male,45,8,150000,3,1,1,80000,15,10
+1003,500,Female,25,0,0,1,0,0,30000,1,0
+1004,800,Male,55,12,200000,2,1,1,120000,20,15
+1005,650,Female,40,5,75000,2,1,0,60000,8,5
